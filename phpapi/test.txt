@@ -1,0 +1,129 @@
+$return = [];
+            foreach ($result as $row) {
+                $userid = $row['id'];
+                $schoolid = $row['schoolid'];
+                $return[] = ['userid' => $row['id'],'fullname' => $row['fullname'],'email' => $row['email'],'mobile' => $row['mobileno']];
+            }
+            $data['user'] = $return;
+            if ($schoolid != 0) {
+                $result = '';
+                $qry = '';
+                $qry = "SELECT * FROM schoolmain WHERE id=" . $schoolid;
+                $result = mysqli_query($con, $qry);
+                $return = [];
+                foreach ($result as $row) {
+                    $return[] = [
+                        'schoolid' => $row['id'],
+                        'holiday' =>'0',
+                        'name' => $row['name']
+                    ];
+                }
+                $data['school'] = $return;
+
+                $result = '';
+                $qry = '';
+                $sql = "SELECT * FROM banners  WHERE schoolid=" . $schoolid;
+                $result = mysqli_query($con, $sql);
+                $return = [];
+                foreach ($result as $row) {
+                    $return[] = [
+                        'id' => $row['id'],
+                        'caption' => $row['caption'],
+                        'image' => "http://www.quantuminfosys.com.np/uploads/" . $row['image']
+                    ];
+                }
+                $data['banner'] = $return;
+
+                $result = '';
+                $qry = '';
+                $sql = "SELECT * FROM pages  WHERE schoolid=" . $schoolid . " ORDER BY pageorder";
+                $result = mysqli_query($con, $sql);
+                $return = [];
+                foreach ($result as $row) {
+                    $return[] = [
+                        'title' => $row['caption'],
+                        'body' => htmlentities($row['content'], ENT_QUOTES | ENT_IGNORE, "UTF-8")
+                            //'body1' => htmlentities($row['content'])
+                    ];
+                }
+                $data['pages'] = $return;
+                //notice
+                $result = '';
+                $qry = '';
+                $sql = "SELECT * FROM notice WHERE schoolid=" . $schoolid . " ORDER BY ndate";
+                $result = mysqli_query($con, $sql);
+                $return = [];
+                foreach ($result as $row) {
+                    $return[] = [
+                        'title' => $row['title'],
+                        'ndate' => $row['ndate'],
+                        'type' => $row['type'],
+                        'postedtime' => $row['postedtime'],
+                        'description' => htmlentities($row['description'], ENT_QUOTES | ENT_IGNORE, "UTF-8")
+                    ];
+                }
+                $data['notice'] = $return;
+                //calender
+                
+                $result = '';
+                $qry = '';
+                $sql = "SELECT * FROM events WHERE schoolid=" . $schoolid . " ORDER BY event_date";
+                $result = mysqli_query($con, $sql);
+                $return = [];
+                foreach ($result as $row) {
+                    $return[] = [
+                        'title' => $row['title'],
+                        'date' => $row['event_date'],
+                        'description' => htmlentities($row['description'], ENT_QUOTES | ENT_IGNORE, "UTF-8")
+                    ];
+                }
+                $data['calender'] = $return;
+                
+            } else {
+                $return = [];
+                $return[] = [
+                       'schoolid' =>"0",
+                       'holiday' =>'',
+                       'name' => "Quantum Infosys Pvt. Ltd."
+                    ];
+                $data['school'] = $return;
+                    
+                $sql = "SELECT * FROM hoosk_banner";
+                $result = mysqli_query($con, $sql);
+                $return = [];
+                foreach ($result as $row) {
+                    $return[] = [
+                        'id' => $row['slideID'],
+                        'caption' => $row['Welcome!'],
+                        'image' => "http://www.quantuminfosys.com.np/uploads/" . $row['slideImage']
+                    ];
+                }
+                $data['banner'] = $return;
+                $result = '';
+                $qry = '';
+                $sql = "SELECT * FROM hoosk_page_content";
+                $result = mysqli_query($con, $sql);
+                $return = [];
+
+                foreach ($result as $row) {
+                    $return[] = [
+                        'title' => $row['pageTitle'],
+                        'body' => htmlentities($row['pageContentHTML'], ENT_QUOTES | ENT_IGNORE, "UTF-8")
+                    ];
+                }
+
+                $data['pages'] = $return;
+                $return = [];
+                $return[] = [
+                	'title' => 'School Setting!',
+                	'ndate' => date("Y/m/d"),
+                	'type' => '1',
+                	'postedtime' => date("Y/m/d"),
+                	'description' => 'Select desire school on your profile settion'
+                ];
+                $data['notice'] = $return;
+
+            }
+
+            $response["status"] = "Success";
+            $response["data"] = $data;
